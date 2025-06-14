@@ -257,23 +257,67 @@
   }
 
   function updateHealthBar(bar, amount) {
-    const currentWidth = parseFloat(bar.style.width || "100");
-    const newWidth = Math.max(0, currentWidth - amount);
-    bar.style.width = newWidth + "%";
-    checkGameOver();
-  }
+  const currentWidth = parseFloat(bar.style.width || "100");
+  const newWidth = Math.max(0, currentWidth - amount);
+  bar.style.width = newWidth + "%";
+  checkGameOver();  // Add this line
+}
+function showEndScreen(message) {
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.background = "rgba(0, 0, 0, 0.8)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.color = "white";
+  overlay.style.fontSize = "40px";
+  overlay.style.zIndex = 999;
+  overlay.style.cursor = "pointer";
+  overlay.innerText = message + "\nClique para voltar ao início.";
 
-  function checkGameOver() {
-    const proto = parseFloat(protoHealth.style.width || "100");
-    const antag = parseFloat(antagHealth.style.width || "100");
-    if (proto <= 0) {
-      overlay.textContent = "Derrota! 😢";
-      overlay.style.display = "flex";
-    } else if (antag <= 0) {
-      overlay.textContent = "Vitória! 🎉";
-      overlay.style.display = "flex";
-    }
+  overlay.addEventListener("click", () => {
+    overlay.remove();
+    goToHomeScreen();
+  });
+
+  document.body.appendChild(overlay);
+}
+
+// Call this function when a character wins or loses
+function checkGameOver() {
+  const antagWidth = parseFloat(antagHealth.style.width || "100");
+  const protoWidth = parseFloat(protoHealth.style.width || "100");
+
+  if (antagWidth <= 0) {
+    showEndScreen("Você venceu! 🎉 ");
+  } else if (protoWidth <= 0) {
+    showEndScreen("Você perdeu! 😢");
   }
+}
+
+function goToHomeScreen() {
+  document.querySelector(".game-container").style.display = "none";
+  document.getElementById("introScreen").style.display = "block";
+  document.getElementById("storyScreen").style.display = "none";
+  document.getElementById("startBattleOverlay").style.display = "none";
+
+  // Reset health
+  protoHealth.style.width = "100%";
+  antagHealth.style.width = "100%";
+
+  // Reset character positions
+  protagonist.style.left = "10%";
+  antagonist.style.right = "10%";
+
+  // Reset positions
+  protoPos = 10;
+  antagPos = 10;
+  antagDirection = -1;
+}
 
   function createProjectile(type, origin, direction, speechText) {
     const proj = document.createElement("div");
