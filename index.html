@@ -166,6 +166,16 @@
 </head>
 <body>
 
+<!-- SECTION: Intro Screen-->
+<div  id="introScreen">
+  <h1>Nome do Jogo</h1>
+  <button 
+  onclick="startGame()"
+    >
+    Iniciar Jogo
+    </button>
+    </div>
+  
 <!-- SECTION: Character Select -->
 <div class="screen character-select active" id="characterSelect">
   <h1>Escolha sua personagem</h1>
@@ -240,6 +250,10 @@
     "Você chegou aqui só por cota."
   ];
 
+  function startGame() {
+  document.getElementById("introScreen").classList.remove("active");
+  document.getElementById("characterSelect").classList.add("active");
+  }
   function selectCharacter(name, img) {
     playerName.textContent = name;
     protagonistImg.src = img;
