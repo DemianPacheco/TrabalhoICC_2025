@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>STEM Fighter Prototype</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    .screen, .game-container, .overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .screen.active, .game-container.active {
+      display: flex;
+    }
+
+    .character-select button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 20px;
+      background: darkmagenta;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .story {
+      font-size: 20px;
+      max-width: 600px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .start-button {
+      margin-top: 20px;
+      font-size: 20px;
+      padding: 10px 30px;
+      background: gold;
+      color: black;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .overlay {
+      background: rgba(0,0,0,0.7);
+      font-size: 48px;
+      z-index: 10;
+    }
+
+    /* Include previous styles (health bar, fighters, projectiles, etc.) */
+    .game-container {
+      background: url('bck.png') no-repeat center center;
+      background-size: cover;
+      overflow: hidden;
+    }
+    .fighter {
+      position: absolute;
+      bottom: 50px;
+      width: 150px;
+      transition: transform 0.2s, left 0.2s, bottom 0.2s;
+    }
+    .fighter img {
+      width: 100%;
+    }
+    .fighter.protagonist {
+      left: 10%;
+    }
+    .fighter.antagonist {
+      right: 10%;
+      transform: scaleX(-1);
+    }
+    .health-bar {
+      position: absolute;
+      top: 20px;
+      width: 40%;
+      height: 20px;
+      background: red;
+      font-size: 30px;
+      color: white;
+    }
+    .health {
+      height: 100%;
+      background: limegreen;
+      width: 100%;
+    }
+    #protobar {
+      left: 5%;
+    }
+    #antagbar {
+      right: 5%;
+    }
+    .attack-button {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 18px;
+      background: gold;
+      border: none;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    .book, .misogyny {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: url('https://cdn-icons-png.flaticon.com/512/29/29302.png') no-repeat center/contain;
+    }
+    .misogyny {
+      background: url('https://cdn-icons-png.flaticon.com/512/3523/3523063.png') no-repeat center/contain;
+    }
+    .speech {
+      position: absolute;
+      background: white;
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      max-width: 200px;
+      color: black;
+    }
+    /* Control overlay */
+    .control-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+    color: #eee;
+    line-height: 1.4;
+    max-width: 180px;
+    }
+
+    /* Character tooltip */
+    .tooltip {
+    display: none;
+    position: absolute;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    width: 250px;
+    z-index: 100;
+    pointer-events: none;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- SECTION: Character Select -->
+<div class="screen character-select active" id="characterSelect">
+  <h1>Escolha sua personagem</h1>
+  <button 
+  onmouseover="showTooltip(event, 'Ada Lovelace', 'Criadora do primeiro algoritmo.', 'Desafiou a sociedade vitoriana ao trabalhar com matemática e computadores com Charles Babbage.')"
+  onmouseout="hideTooltip()"
+  onclick="selectCharacter('Ada Lovelace', 'per.png')"
+    >
+    Ada Lovelace
+    </button>
+
+    <button 
+    onmouseover="showTooltip(event, 'Marie Curie', 'Descobriu o rádio e o polônio.', 'Foi a primeira mulher a ganhar um Nobel — e ainda ganhou dois! Enfrentou críticas e exclusão por ser mulher.')"
+    onmouseout="hideTooltip()"
+    onclick="selectCharacter('Marie Curie', 'marie.png')"
+    >
+    Marie Curie
+    </button>
+    </div>
+
+<!-- SECTION: Story -->
+<div class="screen story-screen" id="storyScreen">
+  <div class="story">
+    Em um mundo onde o machismo tenta silenciar vozes femininas na ciência, uma heroína se levanta para lutar com sabedoria e coragem.
+  </div>
+  <button class="start-button" onclick="startBattle()">Iniciar Batalha</button>
+</div>
+
+<!-- SECTION: Game -->
+<div class="game-container" id="gameContainer">
+  <div class="health-bar" id="protobar"><div class="health" id="protohealth"></div><p id="playerName">Heroína</p></div>
+  <div class="health-bar" id="antagbar"><div class="health" id="antaghealth"></div><p>Coach</p></div>
+
+  <div class="fighter protagonist" id="protagonist">
+    <img id="protagonistImg" src="per.png" alt="Protagonista" />
+  </div>
+  <div class="fighter antagonist" id="antagonist">
+    <img src="ene.png" alt="Antagonista" />
+  </div>
+
+  <button class="attack-button" onclick="attack()">Atacar!</button>
+  <div class="overlay" id="overlay"></div>
+</div>
+
+<script>
+  const protagonist = document.getElementById("protagonist");
+  const protagonistImg = document.getElementById("protagonistImg");
+  const playerName = document.getElementById("playerName");
+  const antagonist = document.getElementById("antagonist");
+  const antagHealth = document.getElementById("antaghealth");
+  const protoHealth = document.getElementById("protohealth");
+  const overlay = document.getElementById("overlay");
+  const gameContainer = document.getElementById("gameContainer");
+
+  let protoPos = 10;
+  let antagPos = 10;
+  let antagDirection = -1;
+  let jumping = false;
+  let crouching = false;
+
+  const frases = [
+    "As mulheres pertencem à ciência!",
+    "Igualdade de gênero é um direito, não um favor.",
+    "Estudos mostram que equipes diversas inovam mais.",
+    "Hedy Lamarr inventou a base do Wi-Fi."
+  ];
+
+  const frasesMisoginas = [
+    "Mulher não entende de tecnologia...",
+    "Você devia sorrir mais.",
+    "Isso é trabalho de homem.",
+    "Você chegou aqui só por cota."
+  ];
+
+  function selectCharacter(name, img) {
+    playerName.textContent = name;
+    protagonistImg.src = img;
+    document.getElementById("characterSelect").classList.remove("active");
+    document.getElementById("storyScreen").classList.add("active");
+  }
+
+  function startBattle() {
+    document.getElementById("storyScreen").classList.remove("active");
+    gameContainer.classList.add("active");
+    overlay.textContent = "Lutem!";
+    overlay.style.display = "flex";
+    setTimeout(() => overlay.style.display = "none", 1500);
+    setInterval(antagMove, 800);
+  }
+
+  function updateHealthBar(bar, amount) {
+    const currentWidth = parseFloat(bar.style.width || "100");
+    const newWidth = Math.max(0, currentWidth - amount);
+    bar.style.width = newWidth + "%";
+    checkGameOver();
+  }
+
+  function checkGameOver() {
+    const proto = parseFloat(protoHealth.style.width || "100");
+    const antag = parseFloat(antagHealth.style.width || "100");
+    if (proto <= 0) {
+      overlay.textContent = "Derrota! 😢";
+      overlay.style.display = "flex";
+    } else if (antag <= 0) {
+      overlay.textContent = "Vitória! 🎉";
+      overlay.style.display = "flex";
+    }
+  }
+
+  function createProjectile(type, origin, direction, speechText) {
+    const proj = document.createElement("div");
+    proj.className = type;
+    const rect = origin.getBoundingClientRect();
+    proj.style.left = (rect.left + (type === 'book' ? 75 : -10)) + "px";
+    proj.style.bottom = "100px";
+    document.body.appendChild(proj);
+
+    const speech = document.createElement("div");
+    speech.className = "speech";
+    speech.textContent = speechText;
+    speech.style.left = (rect.left + 80) + "px";
+    speech.style.bottom = "180px";
+    document.body.appendChild(speech);
+    setTimeout(() => speech.remove(), 2000);
+
+    return proj;
+  }
+
+  function attack() {
+    const frase = frases[Math.floor(Math.random() * frases.length)];
+    const book = createProjectile("book", protagonist, 1, frase);
+
+    let pos = parseFloat(book.style.left);
+    const interval = setInterval(() => {
+      pos += 10;
+      book.style.left = pos + "px";
+      const bookRect = book.getBoundingClientRect();
+      const enemyRect = antagonist.getBoundingClientRect();
+      if (bookRect.right >= enemyRect.left) {
+        updateHealthBar(antagHealth, 10);
+        book.remove();
+        clearInterval(interval);
+      }
+    }, 50);
+  }
+
+  function enemyAttack() {
+    const frase = frasesMisoginas[Math.floor(Math.random() * frasesMisoginas.length)];
+    const insult = createProjectile("misogyny", antagonist, -1, frase);
+
+    let pos = parseFloat(insult.style.left);
+    const interval = setInterval(() => {
+      pos -= 10;
+      insult.style.left = pos + "px";
+      const insultRect = insult.getBoundingClientRect();
+      const playerRect = protagonist.getBoundingClientRect();
+      if (insultRect.left <= playerRect.right) {
+        if (!jumping && !crouching) {
+          updateHealthBar(protoHealth, 10);
+        }
+        insult.remove();
+        clearInterval(interval);
+      }
+    }, 50);
+  }
+
+  function moveProtagonist(direction) {
+    if (direction === "left") {
+      protoPos = Math.max(0, protoPos - 2);
+    } else if (direction === "right") {
+      protoPos = Math.min(80, protoPos + 2);
+    }
+    protagonist.style.left = protoPos + "%";
+  }
+
+  function jump() {
+    if (jumping) return;
+    jumping = true;
+    protagonist.style.bottom = "150px";
+    setTimeout(() => {
+      protagonist.style.bottom = "50px";
+      jumping = false;
+    }, 300);
+  }
+
+  function crouch() {
+    if (crouching) return;
+    crouching = true;
+    protagonist.style.transform = "scaleY(0.5)";
+    setTimeout(() => {
+      protagonist.style.transform = "scaleY(1)";
+      crouching = false;
+    }, 300);
+  }
+
+  function antagMove() {
+    antagPos += antagDirection;
+    if (antagPos < 5 || antagPos > 80) antagDirection *= -1;
+    antagonist.style.right = antagPos + "%";
+    const distance = Math.abs((100 - antagPos) - protoPos);
+    if (distance < 40) {
+      enemyAttack();
+    }
+  }
+
+  document.addEventListener("keydown", (e) => {
+    switch (e.key) {
+      case "ArrowLeft":
+        moveProtagonist("left");
+        break;
+      case "ArrowRight":
+        moveProtagonist("right");
+        break;
+      case "ArrowUp":
+        jump();
+        break;
+      case "ArrowDown":
+        crouch();
+        break;
+      case "a":
+        attack();
+        break;
+      case "s":
+        jump();
+        setTimeout(() => attack(), 200);
+        break;
+    }
+  });
+  // Tooltip logic
+function showTooltip(event, name, contribution, story) {
+  const tooltip = document.getElementById("tooltip");
+  tooltip.innerHTML = `<strong>${name}</strong><br><em>${contribution}</em><br>${story}`;
+  tooltip.style.display = "block";
+  moveTooltip(event);
+}
+
+function moveTooltip(event) {
+  const tooltip = document.getElementById("tooltip");
+  tooltip.style.left = event.pageX + 15 + "px";
+  tooltip.style.top = event.pageY + "px";
+}
+
+function hideTooltip() {
+  document.getElementById("tooltip").style.display = "none";
+}
+
+// Keep tooltip following mouse
+document.addEventListener("mousemove", moveTooltip);
+</script>
+<!-- Tooltip for character descriptions -->
+<div id="tooltip" class="tooltip"></div>
+
+<!-- Control help box -->
+<div class="control-overlay">
+  <strong>Controles:</strong><br/>
+  ← → : mover<br/>
+  ↑ : pular<br/>
+  ↓ : abaixar<br/>
+  A : atacar<br/>
+  S : pular + atacar
+</div>
+</body>
+</html>
