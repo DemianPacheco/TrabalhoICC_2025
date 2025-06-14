@@ -314,11 +314,7 @@ function checkGameOver() {
 }
 
 function goToHomeScreen() {
-  document.querySelector(".game-container").style.display = "none";
-  document.getElementById("introScreen").style.display = "block";
-  document.getElementById("storyScreen").style.display = "none";
-  document.getElementById("startBattleOverlay").style.display = "none";
-
+ 
   // Reset health
   protoHealth.style.width = "100%";
   antagHealth.style.width = "100%";
@@ -331,6 +327,11 @@ function goToHomeScreen() {
   protoPos = 10;
   antagPos = 10;
   antagDirection = -1;
+
+  gameContainer.classList.remove("active");
+  document.getElementById("introScreen").classList.add("active");
+  
+
 }
 
   function createProjectile(type, origin, direction, speechText) {
