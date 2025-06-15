@@ -123,7 +123,7 @@
       background: url('book.png') no-repeat center/contain;
     }
     .misogyny {
-      background: url('https
+      background: url('https://cdn-icons-png.flaticon.com/512/3523/3523063.png') no-repeat center/contain;
     }
     .speech {
       position: absolute;
@@ -264,7 +264,7 @@ Grace Hopper
 
 const frases = [
   "As mulheres pertencem à ciência!",
-  "Igualdade de gênero é um direito, não um favor.",
+  "Igualdade de gênero é um direito, não um favor.",    
   "Estudos mostram que equipes diversas inovam mais.",
   "Hedy Lamarr inventou a base do Wi-Fi.",
   "Grace Hopper criou o primeiro compilador da história.",
@@ -325,10 +325,10 @@ const frases = [
   const currentWidth = parseFloat(bar.style.width || "100");
   const newWidth = Math.max(0, currentWidth - amount);
   bar.style.width = newWidth + "%";
-  checkGameOver(); 
+  checkGameOver();  // Add this line
 }
 function showEndScreen(message) {
-  const endOverlay = document.createElement("div");
+  const endOverlay = document.createElement("div"); // << Renomeado aqui
   endOverlay.style.position = "fixed";
   endOverlay.style.top = 0;
   endOverlay.style.left = 0;
@@ -366,15 +366,15 @@ function checkGameOver() {
 
 function goToHomeScreen() {
  
- 
+  // Reset health
   protoHealth.style.width = "100%";
   antagHealth.style.width = "100%";
 
- 
+  // Reset character positions
   protagonist.style.left = "10%";
   antagonist.style.right = "10%";
 
- 
+  // Reset positions
   protoPos = 10;
   antagPos = 10;
   antagDirection = -1;
@@ -504,7 +504,7 @@ function goToHomeScreen() {
         break;
     }
   });
- 
+  // Tooltip logic
 function showTooltip(event, name, contribution, story) {
   const tooltip = document.getElementById("tooltip");
   tooltip.innerHTML = `<strong>${name}</strong><br><em>${contribution}</em><br>${story}`;
