@@ -328,28 +328,28 @@ const frases = [
   checkGameOver();  // Add this line
 }
 function showEndScreen(message) {
-  const overlay = document.createElement("div");
-  overlay.style.position = "fixed";
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = "100vw";
-  overlay.style.height = "100vh";
-  overlay.style.background = "rgba(0, 0, 0, 0.8)";
-  overlay.style.display = "flex";
-  overlay.style.justifyContent = "center";
-  overlay.style.alignItems = "center";
-  overlay.style.color = "white";
-  overlay.style.fontSize = "40px";
-  overlay.style.zIndex = 999;
-  overlay.style.cursor = "pointer";
-  overlay.innerText = message + "\nClique para voltar ao início.";
+  const endOverlay = document.createElement("div"); // << Renomeado aqui
+  endOverlay.style.position = "fixed";
+  endOverlay.style.top = 0;
+  endOverlay.style.left = 0;
+  endOverlay.style.width = "100vw";
+  endOverlay.style.height = "100vh";
+  endOverlay.style.background = "rgba(0, 0, 0, 0.8)";
+  endOverlay.style.display = "flex";
+  endOverlay.style.justifyContent = "center";
+  endOverlay.style.alignItems = "center";
+  endOverlay.style.color = "white";
+  endOverlay.style.fontSize = "40px";
+  endOverlay.style.zIndex = 999;
+  endOverlay.style.cursor = "pointer";
+  endOverlay.innerText = message + "\nClique para voltar ao início.";
 
-  overlay.addEventListener("click", () => {
-    overlay.remove();
+  endOverlay.addEventListener("click", () => {
+    endOverlay.remove();
     goToHomeScreen();
   });
 
-  document.body.appendChild(overlay);
+  document.body.appendChild(endOverlay);
 }
 
 // Call this function when a character wins or loses
